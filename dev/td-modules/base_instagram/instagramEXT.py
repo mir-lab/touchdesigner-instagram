@@ -26,6 +26,8 @@ class Insta:
 		self.Target_dir 		= parent().par.Savedirectory
 		self.File_name 			= parent().par.Savephotoname
 
+		self.Threaded  			= parent().par.Nonblocking
+
 		self.Source_img_TOP 	= op('null_post')
 
 		print("Insta Post Init")
@@ -51,7 +53,7 @@ class Insta:
 			none
 		'''		
 		colorImgFilePath 		= "{dir}/{file_name}.jpg".format(	dir=self.Target_dir.eval(), 
-																	file_name=self.self.File_name.eval())		
+																	file_name=self.File_name.eval())		
 
 		# make sure we can write image to disk
 		self.Check_path(self.Target_dir.eval())
@@ -60,12 +62,14 @@ class Insta:
 		self.Source_img_TOP.save(colorImgFilePath , async=False)
 
 		# check if we're running a blocking or non-blocking operation
-
+		if self.Threaded.eval():
+			print("Run threaded version")
 		# if blocking
-		# call post process directly
+		else:
+			print("Run as blocking")
+			# call post process directly
 
-		# launch subprocess
-		
+			# launch subprocess
 		pass
 
 	def Check_path(self, colorImgDir):
@@ -121,7 +125,7 @@ class Insta:
 
 		pass
 	
-	def Open_credentials_mgr(self):
+	def Credentials_mgr_window(self, open_win=True):
 		'''
 			Checks to see if a directory exists.
 
@@ -140,9 +144,11 @@ class Insta:
 			---------------
 			none
 		'''
-
-		# open password credentials entry UI
-		op('container_credentials/window1').par.winopen.pulse()
+		if open_win:
+			# open password credentials entry UI
+			op('container_credentials/window1').par.winopen.pulse()
+		else:
+			op('container_credentials/window1').par.winclose.pulse()
 
 		# prompt the user to remember creds
 

@@ -9,3 +9,4 @@ get-pip.py
 
 # mac files
 *.DS_STORE
+dev/temp/
