@@ -23,8 +23,8 @@ class Insta:
 		self.My_op 				= myOp
 		self.Dep_path 			= '{}/dep/python/'.format(project.folder)
 
-		self.Target_dir 		= parent().par.Target_dir
-		self.File_name 			= parent().par.File_name
+		self.Target_dir 		= parent().par.Savedirectory
+		self.File_name 			= parent().par.Savephotoname
 
 		self.Source_img_TOP 	= op('null_post')
 
@@ -142,6 +142,7 @@ class Insta:
 		'''
 
 		# open password credentials entry UI
+		op('container_credentials/window1').par.winopen.pulse()
 
 		# prompt the user to remember creds
 
