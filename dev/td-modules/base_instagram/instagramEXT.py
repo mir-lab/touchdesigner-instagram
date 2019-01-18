@@ -27,8 +27,16 @@ class Insta:
 		self.File_name 			= parent().par.Savephotoname
 
 		self.Threaded  			= parent().par.Nonblocking
+		self.Remember_me 		= op('container_credentials/container_body/container_text_fields/container_remember_me')
+
+		self.Creds_dir 			= '{}/credentials/'.format(project.folder)
+		self.Creds_tox 			= '{}/insta_creds.tox'.format(self.Creds_dir)
 
 		self.Source_img_TOP 	= op('null_post')
+		self.Caption 			= parent().par.Comment
+
+		self.Insta_user 		= op('container_credentials/container_body/container_text_fields/field_user/string')
+		self.Insta_pass 		= op('container_credentials/container_body/container_text_fields/field_pass/string')
 
 		print("Insta Post Init")
 		pass
@@ -67,12 +75,30 @@ class Insta:
 		# if blocking
 		else:
 			print("Run as blocking")
+			self.Post_to_insta( self.Insta_user[0,0].val, 
+								self.Insta_pass[0,0].val,
+								self.Caption.eval(),
+								colorImgFilePath)
 			# call post process directly
 
 			# launch subprocess
 		pass
 
-	def Check_path(self, colorImgDir):
+	def Post_to_insta(self, insta_user, insta_pass, insta_caption, path_to_img):
+
+		# Use text editor to edit the script and type in valid Instagram username/password
+		#print ('I have imported the InstagramAPI')
+
+		Insta = InstagramAPI(insta_user, insta_pass)
+		Insta.login()  # login
+
+		Insta.uploadPhoto(path_to_img, caption=insta_caption)
+		
+		process_msg = "Upload Complete"
+
+		return process_msg
+
+	def Check_path(self, path_to_test):
 		'''
 			Checks to see if a directory exists.
 
@@ -91,10 +117,10 @@ class Insta:
 			---------------
 			none
 		'''
-		if os.path.isdir(colorImgDir):
+		if os.path.isdir(path_to_test):
 			pass
 		else:
-			os.mkdir(colorImgDir)
+			os.mkdir(path_to_test)
 		
 		pass
 	
@@ -149,10 +175,32 @@ class Insta:
 			op('container_credentials/window1').par.winopen.pulse()
 		else:
 			op('container_credentials/window1').par.winclose.pulse()
+			self.Save_creds(self.Remember_me.panel.radio)
 
 		# prompt the user to remember creds
 
 		# if yes - create dir, and save tox of creds
 
 		# if no, do not save
+		pass
+	
+	def Save_creds(self, remember_me):
+		
+		# we want to remember our creds
+		if remember_me:
+			# check to see if we have a directory for our tox, if not let's create it
+			self.Check_path(self.Creds_dir)
+
+			# save our creds as a tox, and set up for future loading
+			op('container_credentials').save(self.Creds_tox)
+			op('container_credentials').par.externaltox = self.Creds_tox
+			op('container_credentials').par.savebackup = False
+			op('container_credentials').save(self.Creds_tox)
+
+		else:
+			# remove path to external file
+			op('container_credentials').par.externaltox = ''
+			# if we're not going to remember our creds, let's nuke the file
+			if os.path.isfile(self.Creds_tox):
+				os.remove(self.Creds_tox)
 		pass
