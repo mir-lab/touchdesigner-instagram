@@ -88,21 +88,48 @@ class Insta:
 										colorImgFilePath)
 			# call post process directly
 
-			# launch subprocess
 		pass
 
 	def Post_to_insta_worker(self, insta_user, insta_pass, insta_caption, path_to_img):
+		'''
+			The worker method that does the work of posting the image to instagram.
 
-		# Use text editor to edit the script and type in valid Instagram username/password
-		#print ('I have imported the InstagramAPI')
+			Moving this portion of the process into a separate method allows this operation to be
+			thread-safe, and allows us to upload to instagram without TouchDesigner freezing. The
+			TOX allows for both behaviors - threaded and non-threaded execution. This means that you
+			have the flexibility to choose if the application should stop responding while it's posting, or
+			if it should continue to run / allow for another instagram post.
+			
 
+			Args
+			---------------
+			insta_user (str):
+			> an instagram user name
+			
+			insta_pass (str):
+			> the password for the instagram account
+
+			insta_caption (str):
+			> an optional caption to added to the upload
+
+			path_to_img (str):
+			> a file path to the image that is going to be uploaded
+
+			Returns
+			---------------
+			process_msg (str):
+			> a string that's delivered when the process is complete
+		'''
+
+		# set-up API calls and longin to the webservice
 		Insta = InstagramAPI(insta_user, insta_pass)
 		Insta.login()  # login
 
+		# upload the image to instagram
 		Insta.uploadPhoto(path_to_img, caption=insta_caption)
-		
-		process_msg = "Upload Complete"
 
+		# return a process image - this would be a good place to add some error handling		
+		process_msg = "Upload Complete"
 		return process_msg
 
 	def Check_path(self, path_to_test):
@@ -111,7 +138,7 @@ class Insta:
 
 			While this seems out of place as a helper method, this really comes from an existing
 			code snippet to solve this problem. If you've gotten this far, and are reading these
-			doc strings - steal this method. Use this helper fucntion in your own work to save
+			doc strings - steal this method. Use this helper function in your own work to save
 			yourself the hassle of missing directories and filed file writes.
 			
 
@@ -131,68 +158,59 @@ class Insta:
 		
 		pass
 	
-	def Create_external_python(self):
-		'''
-			Checks to see if a directory exists.
-
-			While this seems out of place as a helper method, this really comes from an existing
-			code snippet to solve this problem. If you've gotten this far, and are reading these
-			doc strings - steal this method. Use this helper fucntion in your own work to save
-			yourself the hassle of missing directories and filed file writes.
-			
-
-			Args
-			---------------
-			colrImgDir (str):
-			> a file path to check for existing
-
-			Returns
-			---------------
-			none
-		'''
-		# check to see if we have an external python script
-
-		# create script if it's not there
-
-		# otherwise pass and continue
-
-		pass
-	
 	def Credentials_mgr_window(self, open_win=True):
 		'''
-			Checks to see if a directory exists.
+			Handles capturing the user's instagram credentials.
 
-			While this seems out of place as a helper method, this really comes from an existing
-			code snippet to solve this problem. If you've gotten this far, and are reading these
-			doc strings - steal this method. Use this helper fucntion in your own work to save
-			yourself the hassle of missing directories and filed file writes.
+			We need a mechanism for capturing a user's credentials for logging into instagram, and this is one
+			way to solve the challenge. This leverages the UI elements available in TouchDesigner to hold the user
+			credentials, then save them in a binary formate. That allows the user to "Remember Me" between sessions
+			and not have to consistently insert credentials. This method both opens floating window for adding
+			user creds, and goes through the process of both saving and / or deleting those credentials. 
+
+			The process of saving or deleting the credentials happens when the floating window is closed. 
 			
 
 			Args
 			---------------
-			colrImgDir (str):
-			> a file path to check for existing
+			open_win (bool):
+			> a boolean used to issue a command to either open the floating window
+			> or to close that window. As a note it's in the close window call that 
+			> cached creds are saved or deleted
 
 			Returns
 			---------------
 			none
 		'''
+
 		if open_win:
 			# open password credentials entry UI
 			op('container_credentials/window1').par.winopen.pulse()
+		
 		else:
+			# when the UI is closed, run the save_creds() method and externalize or delete credentials
 			op('container_credentials/window1').par.winclose.pulse()
 			self.Save_creds(self.Remember_me.panel.radio)
 
-		# prompt the user to remember creds
-
-		# if yes - create dir, and save tox of creds
-
-		# if no, do not save
 		pass
 	
 	def Save_creds(self, remember_me):
-		
+		'''
+			Handles the process of saving or deleting user credentials.
+
+			To allow the user to save credentials without saving the entire TOE file, this will save
+			the credentials entered into the pop up dialogue in a binary format. This still doesn't pass
+			security muster, but it's better than saving them in plain text.
+
+			Args
+			---------------
+			remember_me (bool):
+			> a boolean that will indicate if credentials should be saved, or ignored.
+
+			Returns
+			---------------
+			none
+		'''		
 		# we want to remember our creds
 		if remember_me:
 			# check to see if we have a directory for our tox, if not let's create it
