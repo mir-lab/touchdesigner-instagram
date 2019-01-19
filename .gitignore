@@ -4,7 +4,6 @@ release/dep/python/*
 
 # the git-pip python bits
 dev/dep/*
-release/*
 get-pip.py
 
 # mac files
