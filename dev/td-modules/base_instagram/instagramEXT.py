@@ -4,6 +4,7 @@ Zoe Sandoval | zoesandoval.com
 '''
 
 import os
+import threading
 from InstagramAPI import InstagramAPI
 
 class Insta:
@@ -43,23 +44,22 @@ class Insta:
 	
 	def Process_img(self):
 		'''
-			Checks to see if a directory exists.
-
-			While this seems out of place as a helper method, this really comes from an existing
-			code snippet to solve this problem. If you've gotten this far, and are reading these
-			doc strings - steal this method. Use this helper fucntion in your own work to save
-			yourself the hassle of missing directories and filed file writes.
+			Saves TOP locally and then posts image to instagram.
 			
+			This process starts by first saving out the target TOP as a .jpg. This allows the process to be 
+			more efficient as the subsequent process can be passed to either a subprocess call, or to
+			another thread. This also ensures that you can keep a local copy of the file - which can be handy
+			to ensure that you have copy of your assets that are local and not just on the web.
 
 			Args
 			---------------
-			colrImgDir (str):
-			> a file path to check for existing
+			none
 
 			Returns
 			---------------
 			none
-		'''		
+		'''
+		# build path to target file
 		colorImgFilePath 		= "{dir}/{file_name}.jpg".format(	dir=self.Target_dir.eval(), 
 																	file_name=self.File_name.eval())		
 
@@ -72,19 +72,26 @@ class Insta:
 		# check if we're running a blocking or non-blocking operation
 		if self.Threaded.eval():
 			print("Run threaded version")
+			myThread            = threading.Thread(	target=self.Post_to_insta_worker,
+													args=( self.Insta_user[0,0].val,
+															self.Insta_pass[0,0].val,
+															self.Caption.eval(),
+															colorImgFilePath,))
+			myThread.start()		
+		
 		# if blocking
 		else:
 			print("Run as blocking")
-			self.Post_to_insta( self.Insta_user[0,0].val, 
-								self.Insta_pass[0,0].val,
-								self.Caption.eval(),
-								colorImgFilePath)
+			self.Post_to_insta_worker( self.Insta_user[0,0].val, 
+										self.Insta_pass[0,0].val,
+										self.Caption.eval(),
+										colorImgFilePath)
 			# call post process directly
 
 			# launch subprocess
 		pass
 
-	def Post_to_insta(self, insta_user, insta_pass, insta_caption, path_to_img):
+	def Post_to_insta_worker(self, insta_user, insta_pass, insta_caption, path_to_img):
 
 		# Use text editor to edit the script and type in valid Instagram username/password
 		#print ('I have imported the InstagramAPI')
