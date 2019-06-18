@@ -21,23 +21,23 @@ class Insta:
 
 	def __init__(self, myOp):
 
-		self.My_op 				= myOp
-		self.Dep_path 			= '{}/dep/python/'.format(project.folder)
+		self.My_op 						= myOp
+		self.Dep_path 					= '{}/dep/python/'.format(project.folder)
 
-		self.Target_dir 		= parent().par.Savedirectory
-		self.File_name 			= parent().par.Savephotoname
+		self.Target_dir 				= parent().par.Savedirectory
+		self.File_name 					= parent().par.Savephotoname
 
-		self.Threaded  			= parent().par.Nonblocking
-		self.Remember_me 		= op('container_credentials/container_body/container_text_fields/container_remember_me')
+		self.Threaded  					= parent().par.Nonblocking
+		self.Remember_me 				= op('container_credentials/container_body/container_text_fields/container_remember_me')
 
-		self.Creds_dir 			= '{}/credentials/'.format(project.folder)
-		self.Creds_tox 			= '{}/insta_creds.tox'.format(self.Creds_dir)
+		self.Creds_dir 					= '{}/credentials/'.format(project.folder)
+		self.Creds_tox 					= '{}/insta_creds.tox'.format(self.Creds_dir)
 
-		self.Source_img_TOP 	= op('null_post')
-		self.Caption 			= parent().par.Comment
+		self.Source_img_TOP 			= op('null_post')
+		self.Caption 					= parent().par.Comment
 
-		self.Insta_user 		= op('container_credentials/container_body/container_text_fields/field_user/string')
-		self.Insta_pass 		= op('container_credentials/container_body/container_text_fields/field_pass/string')
+		self.Insta_user 				= op('container_credentials/container_body/container_text_fields/field_user/string')
+		self.Insta_pass 				= op('container_credentials/container_body/container_text_fields/field_pass/string')
 
 		print("Insta Post Init")
 		pass
@@ -61,7 +61,11 @@ class Insta:
 		'''
 		# build path to target file
 		colorImgFilePath 		= "{dir}/{file_name}.jpg".format(	dir=self.Target_dir.eval(), 
-																	file_name=self.File_name.eval())		
+																	file_name=self.File_name.eval())
+		
+		insta_user 				= self.Insta_user[0,0].val
+		insta_pass				= self.Insta_pass[0,0].val
+		insta_caption 			= self.Caption.eval()
 
 		# make sure we can write image to disk
 		self.Check_path(self.Target_dir.eval())
@@ -72,21 +76,21 @@ class Insta:
 		# check if we're running a blocking or non-blocking operation
 		if self.Threaded.eval():
 			print("Run threaded version")
-			myThread            = threading.Thread(	target=self.Post_to_insta_worker,
-													args=( self.Insta_user[0,0].val,
-															self.Insta_pass[0,0].val,
-															self.Caption.eval(),
+			myThread            = threading.Thread(	target=self.Post_to_insta_thread_worker,
+													args=( insta_user,
+															insta_pass,
+															insta_caption,
 															colorImgFilePath,))
 			myThread.start()		
 		
 		# if blocking
 		else:
-			print("Run as blocking")
-			self.Post_to_insta_worker( self.Insta_user[0,0].val, 
-										self.Insta_pass[0,0].val,
-										self.Caption.eval(),
-										colorImgFilePath)
 			# call post process directly
+			print("Run as blocking")
+			self.Post_to_insta_worker( insta_user, 
+										insta_pass,
+										insta_caption,
+										colorImgFilePath)
 
 		pass
 
